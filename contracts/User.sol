@@ -39,7 +39,7 @@ contract UserContract {
     function addFriend(address target) public returns(bool) {
         require(target != msg.sender);
         User memory userByTarget = getUserByAddress(target);
-        User[] storage friendRequests = FriendRequests[msg.sender];
+        User[] storage friendRequests = FriendRequests[target];
         require(userByTarget.exists);
 
         for(uint i = 0; i < friendRequests.length; i++) {
@@ -47,8 +47,13 @@ contract UserContract {
                 return false;
             }
         }
-        FriendRequests[msg.sender].push(userByTarget);
+        User memory user = getUserByAddress(msg.sender);
+        FriendRequests[target].push(user);
         return true;
+    } 
+
+    function getFriends() public view returns(User[] memory) {
+        return Friends[msg.sender];
     }
 
     function acceptAddFriend(address target) public returns(bool)  {
@@ -65,6 +70,10 @@ contract UserContract {
         if (isRequestExists) {
             friendRequests[index] = friendRequests[friendRequests.length - 1];
             friendRequests.pop();
+            User memory user = getUserByAddress(msg.sender);
+            User memory userByTarget = getUserByAddress(target);
+            Friends[msg.sender].push(userByTarget);
+            Friends[target].push(user);
             return true;
         }
         return false;
@@ -87,7 +96,9 @@ contract UserContract {
     function getUser() public view returns (User memory) {
         return Users[msg.sender];
     }
-
+    function getUsers() public view returns (User[] memory) {
+        return arrUser;
+    } 
     function getUserByAddress(address target) public view returns (User memory) {
         return Users[target];
     }
